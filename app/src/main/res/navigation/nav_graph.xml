@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph.xml"
+    app:startDestination="@id/search_fragment">
+
+    <activity
+        android:id="@+id/main_activity"
+        android:name="com.smh.fbconnect.ui.MainActivity"
+        tools:layout="@layout/activity_main"
+        />
+
+    <fragment
+        android:id="@+id/search_fragment"
+        android:name="com.smh.fbconnect.ui.search.SearchFragment"
+        tools:layout="@layout/fragment_search">
+
+        <action
+            android:id="@+id/to_create_dialog"
+            app:destination="@+id/create_dialog"
+            />
+
+    </fragment>
+
+    <dialog android:id="@+id/create_dialog"
+        android:name="com.smh.fbconnect.ui.create.CreateAppDialog"
+        tools:layout="@layout/dialog_create"
+        />
+
+</navigation>
