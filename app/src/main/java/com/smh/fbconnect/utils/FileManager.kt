@@ -2,6 +2,7 @@ package com.smh.fbconnect.utils
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
@@ -13,8 +14,10 @@ import com.smh.fbconnect.data.local.model.Configs
 import com.smh.fbconnect.utils.extensions.appCacheDir
 import com.smh.fbconnect.utils.extensions.getFileExt
 import com.smh.fbconnect.utils.extensions.getFileName
-import java.io.File
+import java.io.*
+import java.nio.channels.FileChannel
 import javax.inject.Inject
+
 
 class FileManager @Inject constructor(
     private val fragment: Fragment
@@ -26,16 +29,12 @@ class FileManager @Inject constructor(
 
         if (fileExt == "json") {
 
-            if (isValidJsonFile(uri = uri)) {
-                val fileFromCache = File(
-                    fragment.requireContext().appCacheDir,
-                    uri.getFileName(fragment.requireContext())
-                )
-                val finalUri = Uri.fromFile(fileFromCache)
+            val fileFromCache = validateJsonAndWriteFile(uri = uri)
 
+            fileFromCache?.let { file ->
+                val finalUri = Uri.fromFile(file)
                 _uriFileFromCache.value = finalUri
-
-            } else Toast.makeText(
+            }?: Toast.makeText(
                 fragment.requireContext(),
                 "Некорректный json-файл",
                 Toast.LENGTH_LONG
@@ -49,7 +48,7 @@ class FileManager @Inject constructor(
 
     }
 
-    private fun isValidJsonFile(uri: Uri): Boolean {
+    private fun validateJsonAndWriteFile(uri: Uri): File? {
 
         val inputStream = fragment.requireContext().contentResolver.openInputStream(uri)
         val jsonString = inputStream?.bufferedReader().use { it?.readText() }
@@ -62,20 +61,54 @@ class FileManager @Inject constructor(
             json?.let { configs ->
 
                 with(configs) {
-                    return !(type.isNullOrBlank()
-                            || project_id.isNullOrBlank()
-                            || private_key_id.isNullOrBlank()
-                            || private_key.isNullOrBlank()
-                            || client_email.isNullOrBlank()
-                            || client_id.isNullOrBlank()
-                            || auth_uri.isNullOrBlank()
-                            || token_uri.isNullOrBlank()
-                            || auth_provider_x509_cert_url.isNullOrBlank()
-                            || client_x509_cert_url.isNullOrBlank())
+
+                    if (
+                        type.isNullOrBlank()
+                        || project_id.isNullOrBlank()
+                        || private_key_id.isNullOrBlank()
+                        || private_key.isNullOrBlank()
+                        || client_email.isNullOrBlank()
+                        || client_id.isNullOrBlank()
+                        || auth_uri.isNullOrBlank()
+                        || token_uri.isNullOrBlank()
+                        || auth_provider_x509_cert_url.isNullOrBlank()
+                        || client_x509_cert_url.isNullOrBlank()
+                    ) {
+                        return null
+                    }
+                    else {
+                        val fileFromCache = File(
+                            fragment.requireContext().appCacheDir,
+                            uri.getFileName(fragment.requireContext())
+                        )
+
+                        runCatching {
+                            PrintWriter(
+                                FileWriter(fileFromCache.path)
+                            ).use {
+                                it.write(jsonString)
+                            }
+
+                        }.onFailure {
+                            return null
+                        }
+
+                        return fileFromCache
+                    }
                 }
 
-            }?: return false
-        }?: return false
+            }?: return null
+        }?: return null
+    }
+
+    private fun copy(src: File?, dst: File?) {
+        val inStream = FileInputStream(src)
+        val outStream = FileOutputStream(dst)
+        val inChannel: FileChannel = inStream.channel
+        val outChannel: FileChannel = outStream.channel
+        inChannel.transferTo(0, inChannel.size(), outChannel)
+        inStream.close()
+        outStream.close()
     }
 
     private val externalStorageRequestForDocs = fragment.registerForActivityResult(

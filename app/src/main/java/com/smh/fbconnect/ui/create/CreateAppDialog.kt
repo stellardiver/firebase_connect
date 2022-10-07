@@ -2,10 +2,11 @@ package com.smh.fbconnect.ui.create
 
 import android.Manifest
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -51,12 +52,21 @@ class CreateAppDialog: BottomSheetDialogFragment() {
                     ?.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
             }
 
-            fileManager
-                ?.storagePermission
-                ?.onEach {
-                    Log.d("DebugTest", "storagestateflow value: $it")
-                }
-                ?.launchIn(viewLifecycleOwner.lifecycleScope)
+            createAppButton.setOnClickListener {
+                if (isAppDataValid()) {
+                    viewModel.saveApp()
+                    dismiss()
+                } else Toast.makeText(
+                    requireContext(),
+                    "Введите имя приложения и выберите " +
+                            "файл с данными сервисного аккаунта Google Cloud",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+
+            appNameEditText.doAfterTextChanged {
+                viewModel.updateAppName(appName = it?.trim().toString())
+            }
 
             fileManager
                 ?.uriFileFromCache
@@ -64,9 +74,16 @@ class CreateAppDialog: BottomSheetDialogFragment() {
                     it?.let { uriFromCache ->
                         val fileName = uriFromCache.getFileName(requireContext())
                         chosenFileTextView.text = fileName
+                        viewModel.updateAppUriCredentials(uri = uriFromCache)
                     }
                 }
                 ?.launchIn(viewLifecycleOwner.lifecycleScope)
+        }
+    }
+
+    private fun isAppDataValid(): Boolean {
+        binding.apply {
+            return chosenFileTextView.text.isNotBlank() && appNameEditText.text!!.isNotBlank()
         }
     }
 }

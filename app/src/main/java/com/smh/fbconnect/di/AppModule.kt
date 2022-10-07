@@ -1,6 +1,7 @@
 package com.smh.fbconnect.di
 
 import android.content.Context
+import com.smh.fbconnect.utils.DataStorage
 import com.smh.fbconnect.utils.FileManager
 import com.smh.fbconnect.utils.dispatchers.DispatcherProvider
 import com.smh.fbconnect.utils.dispatchers.Dispatchers
@@ -21,4 +22,9 @@ class AppModule {
         return Dispatchers()
     }
 
+    @Singleton
+    @Provides
+    fun provideDataStorage(@ApplicationContext context: Context): DataStorage {
+        return DataStorage(context = context)
+    }
 }

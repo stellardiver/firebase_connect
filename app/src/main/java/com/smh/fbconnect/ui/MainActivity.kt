@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -34,12 +35,15 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+
+        installSplashScreen()
+
+        val view = mainBinding.root
+        setContentView(view)
 
         navHostFragment = supportFragmentManager
             .findFragmentById(R.id.navigation_controller) as NavHostFragment
         navController = navHostFragment?.navController
-
 
     }
 

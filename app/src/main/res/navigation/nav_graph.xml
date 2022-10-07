@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph.xml"
-    app:startDestination="@id/search_fragment">
+    app:startDestination="@id/start_fragment">
 
     <activity
         android:id="@+id/main_activity"
@@ -12,14 +12,30 @@
         />
 
     <fragment
-        android:id="@+id/search_fragment"
-        android:name="com.smh.fbconnect.ui.search.SearchFragment"
-        tools:layout="@layout/fragment_search">
+        android:id="@+id/start_fragment"
+        android:name="com.smh.fbconnect.ui.start.StartFragment"
+        tools:layout="@layout/fragment_start">
 
         <action
             android:id="@+id/to_create_dialog"
             app:destination="@+id/create_dialog"
             />
+
+        <action
+            android:id="@+id/to_edit_fragment"
+            app:destination="@+id/edit_fragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right">
+
+            <argument
+                android:name="app_id"
+                app:argType="integer"
+                android:defaultValue="0"
+                />
+
+        </action>
 
     </fragment>
 
@@ -27,5 +43,18 @@
         android:name="com.smh.fbconnect.ui.create.CreateAppDialog"
         tools:layout="@layout/dialog_create"
         />
+
+    <fragment
+        android:id="@+id/edit_fragment"
+        android:name="com.smh.fbconnect.ui.edit.EditFragment"
+        tools:layout="@layout/fragment_edit">
+
+        <argument
+            android:name="app_id"
+            app:argType="integer"
+            android:defaultValue="0"
+            />
+
+    </fragment>
 
 </navigation>

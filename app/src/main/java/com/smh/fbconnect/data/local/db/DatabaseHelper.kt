@@ -10,4 +10,8 @@ class DatabaseHelper @Inject constructor(private val appDatabase: AppDatabase) {
     suspend fun getApps(): List<AppEntity>? = appDatabase.appDao.getAllApps()
 
     suspend fun getAppById(appId: Int) = appDatabase.appDao.getAppById(appId = appId)
+
+    suspend fun getAppByName(appName: String) = appDatabase.appDao.getAppByName(appName = appName)
+
+    suspend fun insertApp(app: AppEntity) = appDatabase.appDao.insertApp(app = app)
 }

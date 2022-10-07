@@ -10,13 +10,11 @@ class Converters {
 
     @TypeConverter
     fun fromMUri(uri: Uri?): String? {
-        val gson = Gson()
-        return gson.toJson(uri)
+        return uri?.toString()
     }
 
     @TypeConverter
     fun fromUriString(value: String?): Uri? {
-        val listType: Type = object : TypeToken<Uri?>() {}.type
-        return Gson().fromJson<Uri?>(value, listType)
+        return if (value == null) null else Uri.parse(value)
     }
 }
