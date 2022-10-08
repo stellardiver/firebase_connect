@@ -3,8 +3,10 @@ package com.smh.fbconnect.ui.edit
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -21,7 +23,8 @@ import kotlinx.coroutines.flow.onEach
 class EditFragment: Fragment(R.layout.fragment_edit) {
 
     private val args: EditFragmentArgs by navArgs()
-    private val viewModel: MainViewModel by activityViewModels()
+    private val viewModel: EditViewModel by viewModels()
+    private val mainViewModel: MainViewModel by activityViewModels()
     private val binding by viewBinding(
         vbFactory = FragmentEditBinding::bind,
         onViewDestroyed = { binding: FragmentEditBinding ->
@@ -37,6 +40,7 @@ class EditFragment: Fragment(R.layout.fragment_edit) {
         initApp()
 
         with(binding) {
+
             multiSelectSpinner
                 .buildCheckedSpinner(
                     viewModel.countryNameList
@@ -48,10 +52,23 @@ class EditFragment: Fragment(R.layout.fragment_edit) {
 
     private fun initApp() {
 
-        viewModel
-            .initApp(appId = args.appId)
-            .onEach {
+        mainViewModel
+            .getAppConfigs(appId = args.appId)
+            .onEach { remoteConfigs ->
 
+                binding.apply {
+                    with(remoteConfigs) {
+                        app_name?.let { name ->
+                            appNameTitleTextView.text = name
+                        }
+                        path?.let { path ->
+                            appLinkEditText.setText(path, TextView.BufferType.EDITABLE)
+                        }
+                        geos?.let { geos ->
+
+                        }
+                    }
+                }
             }
             .launchIn(viewLifecycleOwner.lifecycleScope)
     }

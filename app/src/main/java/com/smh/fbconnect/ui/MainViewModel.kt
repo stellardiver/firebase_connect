@@ -14,7 +14,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.util.*
 import javax.inject.Inject
 import kotlin.collections.ArrayList
 
@@ -26,7 +25,6 @@ class MainViewModel @Inject constructor(
     private val dataStorage: DataStorage,
     ): ViewModel() {
 
-    private val _countryCodeList get() = dataStorage.countryCodes
     private val _appsStateFlow = MutableStateFlow<ArrayList<AppEntity>?>(null)
     private val _newCreatedApp = MutableLiveData<AppEntity?>(null)
     private val _appName = MutableStateFlow("")
@@ -36,19 +34,7 @@ class MainViewModel @Inject constructor(
     val newCreatedApp get() = _newCreatedApp.asFlow()
     val appsStateFlow get() = _appsStateFlow.asStateFlow()
     val appsList get() = _appList
-    val countryNameList: ArrayList<String> get() {
 
-        val countryCodeList = dataStorage.countryCodes
-        val countryNameList = arrayListOf<String>()
-
-        for (i in countryCodeList.indices) {
-            countryNameList.add(
-                Locale(String(), countryCodeList[i]).displayCountry
-            )
-        }
-
-        return countryNameList
-    }
 
     fun updateAppName(appName: String) {
         _appName.value = appName
@@ -83,8 +69,8 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun initApp(appId: Int): Flow<RemoteConfigs> {
+    fun getAppConfigs(appId: Int): Flow<RemoteConfigs> {
 
-        return repository.initApp(appId = appId)
+        return repository.getAppConfigs(appId = appId)
     }
 }

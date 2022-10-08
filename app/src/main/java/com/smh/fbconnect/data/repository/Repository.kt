@@ -8,14 +8,15 @@ import com.google.auth.oauth2.GoogleCredentials
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 import com.google.firebase.remoteconfig.*
-import com.google.firebase.remoteconfig.internal.TemplateResponse.ConditionResponse
 import com.google.gson.Gson
+import com.google.gson.JsonObject
 import com.google.gson.reflect.TypeToken
 import com.smh.fbconnect.data.local.db.DatabaseHelper
 import com.smh.fbconnect.data.local.entity.AppEntity
-import com.smh.fbconnect.data.local.model.Configs
 import com.smh.fbconnect.data.local.model.RemoteConfigs
+import com.smh.fbconnect.data.local.model.WebViewConfigs
 import com.smh.fbconnect.utils.dispatchers.DispatcherProvider
+import com.smh.fbconnect.utils.extensions.toWords
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.coroutineScope
@@ -32,55 +33,18 @@ class Repository @Inject constructor(
     private val dbHelper: DatabaseHelper
     ) {
 
-    private suspend fun forUse() {
+    private fun initializeApp(app: AppEntity): FirebaseApp {
 
-        coroutineScope {
-            launch(dispatcherProvider.io) {
-                //            val httpTransport: HttpTransport = GoogleNetHttpTransport.newTrustedTransport()
-//            val credential = GoogleCredentials
-//                .fromStream(assets.open("configs.json"))
-//                .createScoped(AnalyticsScopes.all())
-//
-//            val analytics = Analytics.Builder(httpTransport, GsonFactory.getDefaultInstance(), HttpCredentialsAdapter(credential))
-//                .setApplicationName("Way Of Empire").build()
-//
-//            val body = CustomDimension()
-//            body.name = "test_dimension"
-//            body.scope = "USER"
-//            body.active = true
-//
-//            try {
-//                val accounts: Accounts = analytics.management().accounts().list().execute()
-//                val firstAccountId: String = accounts.items[0].id
-//                val properties: Webproperties = analytics.management().webproperties()
-//                    .list(firstAccountId).execute()
-//                val firstWebPropertyId = properties.items[0].id
-//                analytics.management().customDimensions()
-//                    .insert(firstAccountId, firstWebPropertyId, body).execute()
-//            } catch (e: GoogleJsonResponseException) {
-//                System.err.println(
-//                    "There was a service error: "
-//                            + e.details.code + " : "
-//                            + e.details.message
-//                )
-//            }
+        val inputStream = context.contentResolver.openInputStream(app.credentialsPath)
 
-//            template.parameters["settings"] = Parameter()
-//                .setDefaultValue(ParameterValue.of("{\"approve\":false}\"}"))
-//                .setValueType(ParameterValueType.JSON)
-//                .setDescription("Test via Firebase Admin")
-//
-//            try {
-//                val publishedTemplate = FirebaseRemoteConfig.getInstance()
-//                    .publishTemplateAsync(template).get()
-//                Log.d("DebugTest", "Template has been published")
-//                // See the ETag of the published template.
-//            } catch (e: ExecutionException) {
-//                if (e.cause is FirebaseRemoteConfigException) {
-//                    Log.d("DebugTest", e.cause?.message.toString())
-//                }
-//            }
-            }
+        val options = FirebaseOptions.builder()
+            .setCredentials(GoogleCredentials.fromStream(inputStream))
+            .build()
+
+        val firebaseApps = FirebaseApp.getApps()
+
+        return firebaseApps.find { it.name == app.name } ?: run {
+            FirebaseApp.initializeApp(options, app.name)
         }
     }
 
@@ -155,69 +119,118 @@ class Repository @Inject constructor(
 
     }.flowOn(dispatcherProvider.io)
 
-    fun initApp(appId: Int): Flow<RemoteConfigs> {
+    fun getAppConfigs(appId: Int): Flow<RemoteConfigs> {
 
         return flow {
 
             dbHelper.getAppById(appId = appId)?.let { app ->
 
-                val inputStream = context.contentResolver.openInputStream(app.credentialsPath)
-
-                val options = FirebaseOptions.builder()
-                    .setCredentials(GoogleCredentials.fromStream(inputStream))
-                    .build()
-
-                val firebaseApps = FirebaseApp.getApps()
-
-                val initializedApp = firebaseApps.find { it.name == app.name } ?: run {
-                    FirebaseApp.initializeApp(options, app.name)
+                val remoteConfigs = RemoteConfigs().apply {
+                    id = app.id
+                    app_name = app.name
                 }
 
-                val template: Template = FirebaseRemoteConfig
+                val initializedApp = initializeApp(app = app)
+
+                val template = FirebaseRemoteConfig
                     .getInstance(initializedApp)
                     .templateAsync
                     .get()
 
-                val arrayList = arrayOf("IT")
+                template.conditions?.takeIf { it.isNotEmpty() }?.also { conditions ->
+                    for (condition in conditions) {
+                        if (condition.name == "geo") {
 
-                Log.d("DebugTest", arrayList.joinToString(
-                    prefix = "[",
-                    postfix = "]",
-                    separator = ", ",
-                    transform = { "'$it'" }
-                ))
+                            val pattern = "\'(.*)\'".toRegex()
+                            val foundedGeoString = pattern.find(condition.expression)?.value
+                            val geoArray = foundedGeoString?.toWords()
 
-                template.conditions = mutableListOf(
-                    Condition("non_organic", "app.userProperty['non_organic'].exactlyMatches(['true'])"),
-                    Condition("geo", "device.country in ${arrayList.joinToString(
-                        prefix = "[",
-                        postfix = "]",
-                        separator = ", ",
-                        transform = { "'$it'" }
-                    )}"),
-                )
+                            remoteConfigs.geos = geoArray
+                        }
+                    }
+                }
 
-                template.parameters["settings"] = Parameter()
-                    .setDefaultValue(ParameterValue.of("{\"approve\":false}"))
-                    .setConditionalValues(
-                        mapOf(
-                            "non_organic" to ParameterValue.of("{\"approve\":true,\"path\":\"https://trackerlab.org/56bdjdnj\",\"params\":[{\"key\":\"type\",\"value\":\"email\"},{\"key\":\"type\",\"value\":\"mail\"},{\"key\":\"name\",\"value\":\"mail\"},{\"key\":\"name\",\"value\":\"login\"}]}"),
-                            "geo" to ParameterValue.of("{\"approve\":true,\"path\":\"https://trackerlab.org/56bdjdnj\",\"params\":[{\"key\":\"type\",\"value\":\"email\"},{\"key\":\"type\",\"value\":\"mail\"},{\"key\":\"name\",\"value\":\"mail\"},{\"key\":\"name\",\"value\":\"login\"}]}")
-                        )
+                runCatching {
+
+                    val templateJson: JsonObject = Gson().fromJson(
+                        template.toJSON(),
+                        object : TypeToken<JsonObject>() {}.type
                     )
-                    .setValueType(ParameterValueType.JSON)
-                    .setDescription("set by Firebase Connect")
+
+                    val geoValue = templateJson
+                        .getAsJsonObject("parameters")
+                        .getAsJsonObject("settings")
+                        .getAsJsonObject("conditionalValues")
+                        .getAsJsonObject("geo")
+                        .get("value").asString
+
+                    val webViewConfigs: WebViewConfigs = Gson().fromJson(
+                        geoValue,
+                        object : TypeToken<WebViewConfigs>() {}.type
+                    )
+
+                    remoteConfigs.path = webViewConfigs.path
+                }
+
+
+
+                Log.d("DebugTest", "$remoteConfigs")
+
+                emit(remoteConfigs)
+            }
+
+        }.flowOn(dispatcherProvider.io)
+    }
+
+    fun updateAppConfigs(configs: RemoteConfigs): Flow<Unit> {
+
+        return flow {
+
+            dbHelper.getAppById(appId = configs.id)?.let { app ->
+
+                val initializedApp = initializeApp(app = app)
+
+                val template = FirebaseRemoteConfig
+                    .getInstance(initializedApp)
+                    .templateAsync
+                    .get()
+
+                configs.geos?.let { geos ->
+
+                    template.conditions = mutableListOf(
+                        Condition("non_organic", "app.userProperty['non_organic'].exactlyMatches(['true'])"),
+                        Condition("geo", "device.country in ${geos.joinToString(
+                            prefix = "[",
+                            postfix = "]",
+                            separator = ", ",
+                            transform = { "'$it'" }
+                        )}"),
+                    )
+                }
+
+                configs.path?.let { path ->
+
+                    template.parameters["settings"] = Parameter()
+                        .setDefaultValue(ParameterValue.of("{\"approve\":false}"))
+                        .setConditionalValues(
+                            mapOf(
+                                "non_organic" to ParameterValue.of("{\"approve\":true,\"path\":\"$path\",\"params\":[{\"key\":\"type\",\"value\":\"email\"},{\"key\":\"type\",\"value\":\"mail\"},{\"key\":\"name\",\"value\":\"mail\"},{\"key\":\"name\",\"value\":\"login\"}]}"),
+                                "geo" to ParameterValue.of("{\"approve\":true,\"path\":\"$path\",\"params\":[{\"key\":\"type\",\"value\":\"email\"},{\"key\":\"type\",\"value\":\"mail\"},{\"key\":\"name\",\"value\":\"mail\"},{\"key\":\"name\",\"value\":\"login\"}]}")
+                            )
+                        )
+                        .setValueType(ParameterValueType.JSON)
+                        .setDescription("set by Firebase Connect")
+
+                }
 
                 publishTemplate(
                     template = template,
                     firebaseApp = initializedApp
                 ).collect {
-                    emit(RemoteConfigs(1))
+                    emit(Unit)
                 }
             }
 
         }.flowOn(dispatcherProvider.io)
-
     }
-
 }
