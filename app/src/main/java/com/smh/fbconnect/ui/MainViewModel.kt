@@ -60,6 +60,16 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun deleteApp(appId: Int): Flow<ArrayList<AppEntity>> {
+        return repository
+            .deleteApp(
+                appId = appId
+            ).transform { app ->
+                _appList.remove(app)
+                emit(_appList)
+            }
+    }
+
     fun getApps(page: Int): Flow<MutableList<AppEntity>> {
 
         return repository.getApps(page = page).transform { appsFromDb ->

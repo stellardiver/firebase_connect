@@ -13,6 +13,7 @@ import com.smh.fbconnect.R
 import com.smh.fbconnect.databinding.FragmentStartBinding
 import com.smh.fbconnect.ui.MainViewModel
 import com.smh.fbconnect.ui.start.adapters.AppsAdapter
+import com.smh.fbconnect.utils.Constants
 import com.smh.fbconnect.utils.EndlessRecyclerViewScrollListener
 import com.smh.fbconnect.utils.extensions.setBottomDivider
 import dagger.hilt.android.AndroidEntryPoint
@@ -48,7 +49,7 @@ class StartFragment: Fragment(R.layout.fragment_start) {
 
             addAppButton.setOnClickListener {
                 findNavController().navigate(
-                    action.toCreateDialog()
+                    action.toCreateAppDialog()
                 )
             }
         }
@@ -60,6 +61,14 @@ class StartFragment: Fragment(R.layout.fragment_start) {
                 findNavController().navigate(
                     action.toEditFragment(
                         appId = appId
+                    )
+                )
+            },
+            onItemDelete = { appId, position ->
+                findNavController().navigate(
+                    action.toDeleteAppDialog(
+                        appId = appId,
+                        appAdapterPosition = position
                     )
                 )
             }
@@ -122,6 +131,27 @@ class StartFragment: Fragment(R.layout.fragment_start) {
                 }
             }
             .launchIn(viewLifecycleOwner.lifecycleScope)
+
+        requireActivity().supportFragmentManager.setFragmentResultListener(
+            Constants.APP_DELETION_KEY,
+            viewLifecycleOwner
+        ) { _, bundle ->
+
+            viewModel.deleteApp(
+                appId = bundle.getInt(Constants.APP_ID)
+            )
+            .onEach { appList ->
+
+                if (appList.isEmpty())
+                    binding.noAppsAvailableTextView.visibility = View.VISIBLE
+
+                appsAdapter?.deleteItem(
+                    position = bundle.getInt(Constants.APP_ADAPTER_POSITION),
+                    appList = appList
+                )
+            }
+            .launchIn(viewLifecycleOwner.lifecycleScope)
+        }
     }
 
     private fun loadMoreApps(page: Int) {

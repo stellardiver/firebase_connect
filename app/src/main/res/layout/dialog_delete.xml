@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="15dp">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/description_text_view"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:textAlignment="center"
+        android:textSize="17sp"
+        app:lineHeight="22sp"
+        android:textColor="@color/black"
+        android:text="Удалить приложение из списка?"
+        />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/confirm_button"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="25dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/discard_button"
+        app:layout_constraintTop_toBottomOf="@+id/description_text_view"
+        app:layout_constraintHorizontal_weight="1"
+        android:text="Да, удалить"
+        android:textColor="@color/black"
+        android:textAllCaps="false"
+        android:textAlignment="center"
+        android:textSize="16sp"
+        app:lineHeight="16sp"
+        android:background="@drawable/background_button_dialog"
+        android:foreground="?attr/selectableItemBackground"
+        />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/discard_button"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="25dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/confirm_button"
+        app:layout_constraintTop_toBottomOf="@+id/description_text_view"
+        app:layout_constraintHorizontal_weight="1"
+        android:text="Нет, не удалять"
+        android:textColor="@color/black"
+        android:textAllCaps="false"
+        android:textAlignment="center"
+        android:textSize="16sp"
+        app:lineHeight="16sp"
+        android:background="@drawable/background_button_dialog"
+        android:foreground="?attr/selectableItemBackground"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

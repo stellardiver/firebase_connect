@@ -15,6 +15,7 @@ import com.smh.fbconnect.data.local.db.DatabaseHelper
 import com.smh.fbconnect.data.local.entity.AppEntity
 import com.smh.fbconnect.data.local.model.RemoteConfigs
 import com.smh.fbconnect.data.local.model.WebViewConfigs
+import com.smh.fbconnect.utils.Resource
 import com.smh.fbconnect.utils.dispatchers.DispatcherProvider
 import com.smh.fbconnect.utils.extensions.toWords
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -31,7 +32,7 @@ class Repository @Inject constructor(
     @ApplicationContext private val context: Context,
     private val dispatcherProvider: DispatcherProvider,
     private val dbHelper: DatabaseHelper
-    ) {
+) {
 
     private fun initializeApp(app: AppEntity): FirebaseApp {
 
@@ -51,30 +52,29 @@ class Repository @Inject constructor(
     private fun publishTemplate(
         template: Template,
         firebaseApp: FirebaseApp
-    ): Flow<Unit> {
+    ): Flow<Resource<Unit>> {
 
         return flow {
 
             runCatching {
                 FirebaseRemoteConfig.getInstance(firebaseApp)
                     .publishTemplateAsync(template).get()
-                Toast.makeText(
-                    context,
-                    "Изменения успешно опубликованы",
-                    Toast.LENGTH_LONG
-                ).show()
-            }.onFailure {
-                if (it.cause is FirebaseRemoteConfigException) {
-                    Log.d("DebugTest", it.cause?.message.toString())
-                    Toast.makeText(
-                        context,
-                        "При публикации произошоа ошибка ${it.cause?.message.toString()}",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-            }
 
-            emit(Unit)
+                emit(
+                    Resource.success(
+                        Unit,
+                        "Изменения успешно опубликованы"
+                    )
+                )
+
+            }.onFailure {
+                emit(
+                    Resource.error(
+                        Unit,
+                        "При публикации произошла ошибка ${it.cause?.message.toString()}"
+                    )
+                )
+            }
 
         }.flowOn(dispatcherProvider.io)
 
@@ -119,6 +119,16 @@ class Repository @Inject constructor(
 
     }.flowOn(dispatcherProvider.io)
 
+    fun deleteApp(appId: Int): Flow<AppEntity?> = flow<AppEntity?> {
+
+        dbHelper.getAppById(appId = appId)?.let { app ->
+
+            dbHelper.deleteApp(app = app)
+            emit(app)
+        }
+
+    }.flowOn(dispatcherProvider.io)
+
     fun getAppConfigs(appId: Int): Flow<RemoteConfigs> {
 
         return flow {
@@ -139,13 +149,14 @@ class Repository @Inject constructor(
 
                 template.conditions?.takeIf { it.isNotEmpty() }?.also { conditions ->
                     for (condition in conditions) {
+
                         if (condition.name == "geo") {
 
                             val pattern = "\'(.*)\'".toRegex()
                             val foundedGeoString = pattern.find(condition.expression)?.value
-                            val geoArray = foundedGeoString?.toWords()
-
-                            remoteConfigs.geos = geoArray
+                            foundedGeoString?.toWords()?.let {
+                                remoteConfigs.geos = it
+                            }
                         }
                     }
                 }
@@ -161,7 +172,7 @@ class Repository @Inject constructor(
                         .getAsJsonObject("parameters")
                         .getAsJsonObject("settings")
                         .getAsJsonObject("conditionalValues")
-                        .getAsJsonObject("geo")
+                        .getAsJsonObject("non_organic")
                         .get("value").asString
 
                     val webViewConfigs: WebViewConfigs = Gson().fromJson(
@@ -172,17 +183,13 @@ class Repository @Inject constructor(
                     remoteConfigs.path = webViewConfigs.path
                 }
 
-
-
-                Log.d("DebugTest", "$remoteConfigs")
-
                 emit(remoteConfigs)
             }
 
         }.flowOn(dispatcherProvider.io)
     }
 
-    fun updateAppConfigs(configs: RemoteConfigs): Flow<Unit> {
+    fun updateAppConfigs(configs: RemoteConfigs): Flow<Resource<Unit>> {
 
         return flow {
 
@@ -195,29 +202,35 @@ class Repository @Inject constructor(
                     .templateAsync
                     .get()
 
-                configs.geos?.let { geos ->
+                if (configs.geos.isNotEmpty()) {
 
                     template.conditions = mutableListOf(
                         Condition("non_organic", "app.userProperty['non_organic'].exactlyMatches(['true'])"),
-                        Condition("geo", "device.country in ${geos.joinToString(
+                        Condition("geo", "device.country in ${configs.geos.joinToString(
                             prefix = "[",
                             postfix = "]",
                             separator = ", ",
                             transform = { "'$it'" }
                         )}"),
                     )
+
+                } else template.conditions?.takeIf { it.isNotEmpty() }?.also { conditions ->
+                    for (condition in conditions)
+                        if (condition.name == "geo") template.conditions.remove(condition)
                 }
 
                 configs.path?.let { path ->
 
+                    val conditionValuesMap = mutableMapOf<String, ParameterValue>()
+
+                    conditionValuesMap["non_organic"] = ParameterValue.of("{\"approve\":true,\"path\":\"$path\",\"params\":[{\"key\":\"type\",\"value\":\"email\"},{\"key\":\"type\",\"value\":\"mail\"},{\"key\":\"name\",\"value\":\"mail\"},{\"key\":\"name\",\"value\":\"login\"}]}")
+
+                    if (configs.geos.isNotEmpty())
+                        conditionValuesMap["geo"] = ParameterValue.of("{\"approve\":true,\"path\":\"$path\",\"params\":[{\"key\":\"type\",\"value\":\"email\"},{\"key\":\"type\",\"value\":\"mail\"},{\"key\":\"name\",\"value\":\"mail\"},{\"key\":\"name\",\"value\":\"login\"}]}")
+
                     template.parameters["settings"] = Parameter()
                         .setDefaultValue(ParameterValue.of("{\"approve\":false}"))
-                        .setConditionalValues(
-                            mapOf(
-                                "non_organic" to ParameterValue.of("{\"approve\":true,\"path\":\"$path\",\"params\":[{\"key\":\"type\",\"value\":\"email\"},{\"key\":\"type\",\"value\":\"mail\"},{\"key\":\"name\",\"value\":\"mail\"},{\"key\":\"name\",\"value\":\"login\"}]}"),
-                                "geo" to ParameterValue.of("{\"approve\":true,\"path\":\"$path\",\"params\":[{\"key\":\"type\",\"value\":\"email\"},{\"key\":\"type\",\"value\":\"mail\"},{\"key\":\"name\",\"value\":\"mail\"},{\"key\":\"name\",\"value\":\"login\"}]}")
-                            )
-                        )
+                        .setConditionalValues(conditionValuesMap)
                         .setValueType(ParameterValueType.JSON)
                         .setDescription("set by Firebase Connect")
 
@@ -227,7 +240,7 @@ class Repository @Inject constructor(
                     template = template,
                     firebaseApp = initializedApp
                 ).collect {
-                    emit(Unit)
+                    emit(it)
                 }
             }
 

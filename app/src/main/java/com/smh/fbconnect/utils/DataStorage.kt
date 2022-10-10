@@ -1,9 +1,21 @@
 package com.smh.fbconnect.utils
 
 import android.content.Context
+import com.smh.fbconnect.R
 import javax.inject.Inject
 
 class DataStorage @Inject constructor(private val context: Context) {
+
+    fun generateOpenedGeosText(countriesList: ArrayList<String>): String {
+
+        return if (countriesList.isNotEmpty()) {
+            context.getString(
+                R.string.opened_geos,
+                countriesList.joinToString(separator = ", ")
+            )
+        } else context.getString(R.string.no_opened_geos)
+
+    }
 
     val countryCodes: Array<String> get() = arrayOf(
         "AU", "AT", "AZ", "AX", "AL", "DZ", "AS", "AI", "AO", "AD", "AQ", "AG", "AR", "AM", "AW", "AF",

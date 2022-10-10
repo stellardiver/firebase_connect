@@ -1,9 +1,6 @@
 package com.smh.fbconnect.data.local.dao
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import com.smh.fbconnect.data.local.entity.AppEntity
 
 @Dao
@@ -20,4 +17,10 @@ interface AppDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertApp(app: AppEntity)
+
+    @Delete
+    suspend fun deleteApp(app: AppEntity)
+
+    @Query("DELETE FROM appEntity WHERE id = :appId")
+    suspend fun deleteAppById(appId: Int)
 }

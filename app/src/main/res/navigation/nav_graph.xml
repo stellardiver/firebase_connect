@@ -17,8 +17,8 @@
         tools:layout="@layout/fragment_start">
 
         <action
-            android:id="@+id/to_create_dialog"
-            app:destination="@+id/create_dialog"
+            android:id="@+id/to_create_app_dialog"
+            app:destination="@+id/create_app_dialog"
             />
 
         <action
@@ -37,12 +37,48 @@
 
         </action>
 
+        <action
+            android:id="@+id/to_delete_app_dialog"
+            app:destination="@+id/delete_app_dialog">
+
+            <argument
+                android:name="app_id"
+                app:argType="integer"
+                android:defaultValue="0"
+                />
+
+            <argument
+                android:name="app_adapter_position"
+                app:argType="integer"
+                android:defaultValue="0"
+                />
+
+        </action>
+
     </fragment>
 
-    <dialog android:id="@+id/create_dialog"
+    <dialog android:id="@+id/create_app_dialog"
         android:name="com.smh.fbconnect.ui.create.CreateAppDialog"
         tools:layout="@layout/dialog_create"
         />
+
+    <dialog android:id="@+id/delete_app_dialog"
+        android:name="com.smh.fbconnect.ui.start.DeleteAppDialog"
+        tools:layout="@layout/dialog_create">
+
+        <argument
+            android:name="app_id"
+            app:argType="integer"
+            android:defaultValue="0"
+            />
+
+        <argument
+            android:name="app_adapter_position"
+            app:argType="integer"
+            android:defaultValue="0"
+            />
+
+    </dialog>
 
     <fragment
         android:id="@+id/edit_fragment"

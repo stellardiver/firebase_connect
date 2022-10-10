@@ -101,16 +101,6 @@ class FileManager @Inject constructor(
         }?: return null
     }
 
-    private fun copy(src: File?, dst: File?) {
-        val inStream = FileInputStream(src)
-        val outStream = FileOutputStream(dst)
-        val inChannel: FileChannel = inStream.channel
-        val outChannel: FileChannel = outStream.channel
-        inChannel.transferTo(0, inChannel.size(), outChannel)
-        inStream.close()
-        outStream.close()
-    }
-
     private val externalStorageRequestForDocs = fragment.registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()) {
 
