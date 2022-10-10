@@ -22,7 +22,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 class DeleteAppDialog: BottomSheetDialogFragment() {
 
     private val binding by viewBinding(DialogDeleteBinding::bind)
-    private val mainViewModel: MainViewModel by activityViewModels()
     private val args: DeleteAppDialogArgs by navArgs()
 
     override fun onCreateView(

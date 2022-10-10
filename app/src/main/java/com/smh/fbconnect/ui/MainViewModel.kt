@@ -20,19 +20,15 @@ import kotlin.collections.ArrayList
 @HiltViewModel
 @ExperimentalCoroutinesApi
 class MainViewModel @Inject constructor(
-    private val repository: Repository,
-    private val dispatcher: DispatcherProvider,
-    private val dataStorage: DataStorage,
-    ): ViewModel() {
+    private val repository: Repository
+): ViewModel() {
 
-    private val _appsStateFlow = MutableStateFlow<ArrayList<AppEntity>?>(null)
     private val _newCreatedApp = MutableLiveData<AppEntity?>(null)
     private val _appName = MutableStateFlow("")
     private val _appCredentials = MutableStateFlow<Uri>(Uri.parse(""))
     private val _appList = arrayListOf<AppEntity>()
 
     val newCreatedApp get() = _newCreatedApp.asFlow()
-    val appsStateFlow get() = _appsStateFlow.asStateFlow()
     val appsList get() = _appList
 
 

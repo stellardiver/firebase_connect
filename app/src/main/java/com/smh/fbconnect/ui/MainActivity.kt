@@ -28,7 +28,6 @@ import java.io.IOException
 @ExperimentalCoroutinesApi
 class MainActivity : AppCompatActivity() {
 
-    private val viewModel: MainViewModel by viewModels()
     private val mainBinding by viewBinding(ActivityMainBinding::inflate)
     private var navHostFragment: NavHostFragment? = null
     private var navController: NavController? = null
@@ -45,16 +44,5 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(R.id.navigation_controller) as NavHostFragment
         navController = navHostFragment?.navController
 
-    }
-
-    fun getJsonDataFromAsset(context: Context, fileName: String): String? {
-        val jsonString: String
-        try {
-            jsonString = context.assets.open(fileName).bufferedReader().use { it.readText() }
-        } catch (ioException: IOException) {
-            ioException.printStackTrace()
-            return null
-        }
-        return jsonString
     }
 }
