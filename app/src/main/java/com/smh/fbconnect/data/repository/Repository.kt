@@ -202,22 +202,29 @@ class Repository @Inject constructor(
                     .templateAsync
                     .get()
 
+                val conditionsList = mutableListOf<Condition>()
+
+                conditionsList.add(
+                    Condition("non_organic", "app.userProperty['non_organic'].exactlyMatches(['true'])")
+                )
+
                 if (configs.geos.isNotEmpty()) {
 
-                    template.conditions = mutableListOf(
-                        Condition("non_organic", "app.userProperty['non_organic'].exactlyMatches(['true'])"),
+                    conditionsList.add(
                         Condition("geo", "device.country in ${configs.geos.joinToString(
                             prefix = "[",
                             postfix = "]",
                             separator = ", ",
                             transform = { "'$it'" }
-                        )}"),
+                        )}")
                     )
 
                 } else template.conditions?.takeIf { it.isNotEmpty() }?.also { conditions ->
                     for (condition in conditions)
                         if (condition.name == "geo") template.conditions.remove(condition)
                 }
+
+                template.conditions = conditionsList
 
                 configs.path?.let { path ->
 
