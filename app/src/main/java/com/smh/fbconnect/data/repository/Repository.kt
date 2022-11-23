@@ -82,7 +82,7 @@ class Repository @Inject constructor(
 
     fun getApps(page: Int): Flow<MutableList<AppEntity>> = flow {
 
-        val allAppsChunkedList = dbHelper.getApps()?.chunked(size = 20)
+        val allAppsChunkedList = dbHelper.getApps()?.chunked(size = 60)
 
         allAppsChunkedList?.let { list ->
 
