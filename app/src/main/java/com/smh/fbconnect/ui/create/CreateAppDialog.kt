@@ -58,8 +58,7 @@ class CreateAppDialog: BottomSheetDialogFragment() {
                     dismiss()
                 } else Toast.makeText(
                     requireContext(),
-                    "Введите имя приложения и выберите " +
-                            "файл с данными сервисного аккаунта Google Cloud",
+                    getString(R.string.choose_services_json),
                     Toast.LENGTH_LONG
                 ).show()
             }

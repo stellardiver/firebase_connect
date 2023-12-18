@@ -1,12 +1,10 @@
 package com.smh.fbconnect.ui.edit
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.webkit.URLUtil
 import android.widget.TextView
 import android.widget.Toast
-import androidx.core.view.get
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -20,7 +18,6 @@ import com.smh.fbconnect.R
 import com.smh.fbconnect.databinding.FragmentEditBinding
 import com.smh.fbconnect.ui.MainViewModel
 import com.smh.fbconnect.ui.edit.adapters.CountryAdapter
-import com.smh.fbconnect.utils.Status
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -61,7 +58,7 @@ class EditFragment: Fragment(R.layout.fragment_edit) {
                     updateConfigs(appLink = appLink)
                 } else {
                     viewLifecycleOwner.lifecycleScope.launch {
-                        appLinkTextInputLayout.error = "Некорректная ссылка"
+                        appLinkTextInputLayout.error = getString(R.string.incorrect_link)
                         delay(2000)
                         appLinkTextInputLayout.error = null
                     }
@@ -122,7 +119,7 @@ class EditFragment: Fragment(R.layout.fragment_edit) {
                         progressLayout.visibility = View.GONE
                         innerLayout.visibility = View.VISIBLE
 
-                        app_name?.let { name ->
+                        appName?.let { name ->
                             appNameTitleTextView.text = name
                         }
                         path?.let { path ->

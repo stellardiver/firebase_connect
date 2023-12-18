@@ -49,7 +49,7 @@
             android:textSize="14sp"
             app:lineHeight="22sp"
             android:textColor="@color/dim_gray"
-            android:text="Ссылка для вебвью приложения:"
+            android:text="@string/app_link_title_text"
             />
 
         <com.google.android.material.textfield.TextInputLayout
@@ -111,7 +111,7 @@
             app:layout_constraintStart_toStartOf="parent"
             android:foreground="?attr/selectableItemBackground"
             android:textAllCaps="false"
-            android:text="Закрыть все гео"
+            android:text="@string/deselect_all_geos_button_text"
             />
 
         <androidx.recyclerview.widget.RecyclerView
@@ -141,7 +141,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             android:foreground="?attr/selectableItemBackground"
             android:textAllCaps="false"
-            android:text="Сохранить и опубликовать"
+            android:text="@string/update_app_button_text"
             />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -161,7 +161,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="15dp"
-            android:text="Загрузка конфигурации.."
+            android:text="@string/configuration_loading_text"
             android:textColor="@color/dim_gray"
             android:textSize="20sp"
             />
@@ -211,7 +211,7 @@
                 android:layout_width="330dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="15dp"
-                android:text="Сохраняем изменения в Firebase.."
+                android:text="@string/saving_changes_text"
                 android:textColor="@color/white"
                 android:textSize="20sp"
                 />

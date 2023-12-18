@@ -2,8 +2,6 @@ package com.smh.fbconnect.data.repository
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
-import android.widget.Toast
 import com.google.auth.oauth2.GoogleCredentials
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
@@ -20,9 +18,7 @@ import com.smh.fbconnect.utils.dispatchers.DispatcherProvider
 import com.smh.fbconnect.utils.extensions.toWords
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -137,7 +133,7 @@ class Repository @Inject constructor(
 
                 val remoteConfigs = RemoteConfigs().apply {
                     id = app.id
-                    app_name = app.name
+                    appName = app.name
                 }
 
                 val initializedApp = initializeApp(app = app)

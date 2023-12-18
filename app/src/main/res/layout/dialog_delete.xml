@@ -16,7 +16,7 @@
         android:textSize="17sp"
         app:lineHeight="22sp"
         android:textColor="@color/black"
-        android:text="Удалить приложение из списка?"
+        android:text="@string/dialog_delete_title_text"
         />
 
     <androidx.appcompat.widget.AppCompatButton
@@ -28,7 +28,7 @@
         app:layout_constraintEnd_toStartOf="@id/discard_button"
         app:layout_constraintTop_toBottomOf="@+id/description_text_view"
         app:layout_constraintHorizontal_weight="1"
-        android:text="Да, удалить"
+        android:text="@string/confirm_button_text"
         android:textColor="@color/black"
         android:textAllCaps="false"
         android:textAlignment="center"
@@ -47,7 +47,7 @@
         app:layout_constraintStart_toEndOf="@id/confirm_button"
         app:layout_constraintTop_toBottomOf="@+id/description_text_view"
         app:layout_constraintHorizontal_weight="1"
-        android:text="Нет, не удалять"
+        android:text="@string/discard_button_text"
         android:textColor="@color/black"
         android:textAllCaps="false"
         android:textAlignment="center"

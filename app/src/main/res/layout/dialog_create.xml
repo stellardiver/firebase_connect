@@ -15,7 +15,7 @@
         android:textSize="17sp"
         app:lineHeight="22sp"
         android:textColor="@color/black"
-        android:text="Для добавления приложения необходимо ввести имя приложения и выбрать файл с данными сервисного аккаунта Google Cloud"
+        android:text="@string/dialog_create_description_text"
         />
 
     <androidx.appcompat.widget.AppCompatTextView
@@ -29,7 +29,7 @@
         android:textSize="14sp"
         app:lineHeight="22sp"
         android:textColor="@color/dim_gray"
-        android:text="Имя приложения:"
+        android:text="@string/app_name_label_text"
         />
 
     <com.google.android.material.textfield.TextInputLayout
@@ -86,7 +86,7 @@
             android:foreground="?attr/selectableItemBackground"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:text="Выбрать файл"
+            android:text="@string/choose_file_button_text"
             />
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -117,7 +117,7 @@
         app:layout_constraintTop_toBottomOf="@id/file_layout"
         android:foreground="?attr/selectableItemBackground"
         android:textAllCaps="false"
-        android:text="Добавить приложение"
+        android:text="@string/create_app_button_text"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -2,4 +2,19 @@
     <string name="app_name">Firebase Connect</string>
     <string name="opened_geos">Открытые гео для органики: %s</string>
     <string name="no_opened_geos">Нет открытых гео для органики</string>
+    <string name="choose_services_json">Введите имя приложения и выберите файл с данными сервисного аккаунта Google Cloud</string>
+    <string name="discard_button_text">Нет, не удалять</string>
+    <string name="confirm_button_text">Да, удалить</string>
+    <string name="dialog_delete_title_text">Удалить приложение из списка?</string>
+    <string name="saving_changes_text">Сохраняем изменения в Firebase..</string>
+    <string name="dialog_create_description_text">Для добавления приложения необходимо ввести имя приложения и выбрать файл с данными сервисного аккаунта Google Cloud</string>
+    <string name="app_name_label_text">Имя приложения:</string>
+    <string name="choose_file_button_text">Выбрать файл</string>
+    <string name="create_app_button_text">Добавить приложение</string>
+    <string name="app_link_title_text">Ссылка для вебвью приложения:</string>
+    <string name="deselect_all_geos_button_text">Закрыть все гео</string>
+    <string name="update_app_button_text">Сохранить и опубликовать</string>
+    <string name="configuration_loading_text">Загрузка конфигурации..</string>
+    <string name="no_apps_available_text">Нет доступных приложений</string>
+    <string name="incorrect_link">Некорректная ссылка</string>
 </resources>
